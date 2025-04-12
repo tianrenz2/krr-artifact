@@ -9,10 +9,12 @@ apt-get install -y make gcc libncurses5-dev dpkg-dev build-essential bison flex 
 python3 -m pip install pandas psutil qemu.qmp matplotlib seaborn gdown
 
 echo "Step1: compile KRR QEMU"
-git submodule update --init --recursive
-cd qemu-tcg-kvm;git checkout main;mkdir -p build;cd build;../configure --target-list=x86_64-softmmu; make -j$(nproc);./qemu-img create nkbypass.img 5G;mkfs.ext4 nkbypass.img;cd ../..
+gdown --id 19dFibkU_ltCtldfFtIwOiVcGVylptlPf
+tar -xf qemu-tcg-kvm.tar.gz
+cd qemu-tcg-kvm;mkdir -p build;cd build;../configure --target-list=x86_64-softmmu --enable-rr-dma-copyfree; make -j$(nproc);./qemu-img create nkbypass.img 5G;mkfs.ext4 nkbypass.img;./qemu-img create nvm.img 5G;cd ../..
 
 echo "Step2: compile KRR Kernel"
+git clone -b rr-para https://github.com/tianrenz2/kernel-rr-linux.git
 cp scripts/kernel_rr_config kernel-rr-linux/.config
 cd kernel-rr-linux/;git checkout rr-para;make -j$(nproc);make modules_install;make install;cd ..
 
