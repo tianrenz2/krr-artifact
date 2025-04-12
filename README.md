@@ -1,6 +1,6 @@
 # KRR: Efficient and Scalable Kernel Record Replay
 
-This is a central repo for kernel-rr project, the code is distributed in 3 parts (QEMU, KVM and guest linux). The are present as submodules in this repo.
+KRR is a kernel record replay tool supporting multi-core, it can record the guest kernel execution in KVM(hardware-assist virtualization) and replay it exactly in TCG(full emulation).
 
 ## Pre-requirement
 
@@ -10,16 +10,13 @@ Generally KRR is suitable to x86_64 processors, but Intel processor is recommend
 ### Environment
 KRR's hypervisor is built upon Linux 5.17.5, Ubuntu 22.04 is recommended.
 
-## KRR Tutorial
-To use KRR for record and replay, please follow this [tutorial](https://github.com/rssys/qemu-tcg-kvm?tab=readme-ov-file#krr-kernel-rr).
-
 ## Run Experiments
 
 Hardware Requirements: Intel with at least 32 cores, or refer c6420 on [Cloudlab](https://docs.cloudlab.us/hardware.html#(part._hardware)).
 
 1. Clone the repo:
 ```
-git clone https://github.com/rssys/kernelonly-rr-dev.git
+git clone https://github.com/tianrenz2/krr-artifact.git
 ```
 
 1. Go to the project directory, prepare environment and tools:
@@ -42,3 +39,6 @@ make test_rocksdb
 ```
 make test_rocksdb_spdk
 ```
+
+## Play with KRR Record Replay
+To use KRR for record and replay, please follow this [tutorial](tutorial/README.md).
