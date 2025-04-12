@@ -1,0 +1,10 @@
+[Unit]
+Description=qbittorrent torrent server
+
+[Service]
+User=root
+ExecStart=bash {init_path}
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
