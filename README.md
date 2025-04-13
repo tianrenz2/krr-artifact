@@ -12,7 +12,7 @@ KRR's hypervisor is built upon Linux 5.17.5, Ubuntu 22.04 is recommended.
 
 ## Run Experiments
 
-Hardware Requirements: Intel with at least 32 cores, or refer c6420 on [Cloudlab](https://docs.cloudlab.us/hardware.html#(part._hardware)).
+Hardware Requirements: Intel with at least 32 cores and 64GB memory, or refer c6420 on [Cloudlab](https://docs.cloudlab.us/hardware.html#(part._hardware)).
 
 1. Clone the repo:
 ```
@@ -32,10 +32,11 @@ Then reboot the machine to launch the KRR host kernel, its version should be `5.
 
 1. Run benchmark RocksDB:
 ```
-make test_rocksdb
+make test_rocksdb schemes=baseline,kernel_rr,whole_system_rr
 ```
+Note: the baseline is the mode without record, kernel_rr is KRR record and whole_system_rr is the VM-RR record. If whole_system_rr is enabled, then the whole test time will be extended a lot, as it's very slow on large number of vCPUs.
 
-1. Run benchmark RocksDB SPDK benchmarks:
+2. Run benchmark RocksDB SPDK benchmarks:
 ```
 make test_rocksdb_spdk
 ```

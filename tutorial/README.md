@@ -47,13 +47,17 @@ make install
 1. First, go to kernel RR QEMU code:
 ```
 cd qemu-tcg-kvm
+```
+
+2. Compile:
+```
 mkdir build
 cd build
 ../configure --target-list=x86_64-softmmu
 make -j
 ```
 
-3. Get the kernel you want to test, here is a prepared [Linux kernel image & vmlinux package](https://drive.google.com/file/d/1cO0qMsqkReSKdHDZ1XC8r3-lT-ixJqfW/view?usp=drive_link)(6.1.0), if you want to build on your own, here is a [guide](#make-your-own-recordable-kernel) to help compile your recordable guest kernel image.
+3. Get the kernel you want to test, here is a prepared [Linux kernel image](https://drive.google.com/file/d/1cO0qMsqkReSKdHDZ1XC8r3-lT-ixJqfW/view?usp=drive_link) & [vmlinux](https://drive.google.com/file/d/1ZgOJHexDfFAvf2TX9EFhv_Fn_DBsb3oe/view?usp=drive_link) based on 6.1.0, if you want to build on your own, here is a [guide](#make-your-own-recordable-kernel) to help compile your recordable guest kernel image.
 
 4. Get the root disk image you want to boot, [here](https://github.com/google/syzkaller/blob/master/tools/create-image.sh) is a script from syzkaller that helps you create a simple rootfs image.
 
@@ -92,23 +96,23 @@ This will have the output below that summarizes the record data, like the number
 root@wintermute:~# (qemu) rr_end_record
 disabled in ivshmem
 event number = 0
-current pos 10872, rotated_bytes 0, current_bytes 597999, total_bytes 597999
+current pos 163053, rotated_bytes 0, current_bytes 6159268, total_bytes 6159268
 Getting result
 Result buffer 0x0
 === Event Stats ===
-Interrupt: 151
-Syscall: 295
-Exception: 163
-CFU: 139
-GFU: 411
-IO Input: 753
-RDTSC: 7587
-RDSEED: 0
-PTE: 1353
+Interrupt: 612
+Syscall: 335
+Exception: 168
+CFU: 180       -> Data Copy from User
+GFU: 407       -> Get from user
+IO Input: 5081      -> IO Instruction
+RDTSC: 154463
+RDSEED: 4
+PTE: 1799           -> Page Table Entry Access
 Inst Sync: 0
-DMA Buf Size: 442368
-Total Replay Events: 10872
-Time(s): 3.81
+DMA Buf Size: 151552
+Total Replay Events: 163053
+Time(s): 38.17
 synced queue header, current_pos=10872
 writing queue header with 10872, pos=48
 Start persisted event
@@ -122,7 +126,7 @@ network entry number 0, total net buf 0
 9. After finishing the record session, you get the files below, which are necessary to get it replayed:
 ```
 kernel_rr.log: stores the event trace.
-kernel_rr_dma-<number>.log: stores the disk DMA data, <number> means the disk device id.
+kernel_rr_dma-<number>.log: stores the disk DMA data, <number> refers to the device id.
 kernel_rr_network.log: stores the network data.
 test1: initial snapshot file of your system, its name is the same as the record session name you give in step 6.
 ```
@@ -136,8 +140,8 @@ As an example, my replay snapshot is named as "test1".
 First, make sure you have these 4 files under your `build` directory from last step:
 - test1: the snapshot file storing VM's initial memory state;
 - kernel_rr.log: main event trace;
-- kernel_rr_dma-<number>.log: Disk DMA data.
-- kernel_rr_network.log: Network device data.
+- kernel_rr_dma-`<number>`.log: Disk DMA data;
+- kernel_rr_network.log: Network data.
 
 You also need the original disk image file you used for record, it's not going to be actually read in replay, it's just for consistent hardware configuration between record and replay.
 
@@ -178,36 +182,61 @@ cd qemu-tcg-kvm/build/
 make -j
 ```
 
-4. Replay:
-Execute basic command:
+4. Start replay:
+In summary, the replay QEMU arguments are almost the same as the arguments for the record, except the following:
 ```
-../build/qemu-system-x86_64 -accel tcg -smp 1 -cpu Broadwell -no-hpet -m 2G -hda <disk image> -device ivshmem-plain,memdev=hostmem -object memory-backend-file,size=4096M,share,mem-path=/dev/shm/ivshmem,id=hostmem -kernel-replay test1 -singlestep -D rec.log -replay-log-bound start=0 -monitor stdio -vnc :0
-```
-And it will automatically start replaying.
+-accel tcg  // Change from kvm to tcg
+-cpu Broadwell // Change from "host" to a CPU Model
+``` 
 
-In the command: `-kernel-replay` is the name of your snapshot file;
+Added the following arguments:
+```
+-kernel-replay <record name> -singlestep
+```
+The `<record name>` is the name the you specified when executing `rr_record <record name>` in the record step.
+
+**Apart from the arguments mentioned above, the other VM configuration should be exactly the same as record.**
+
+Example:
+If your record arguments are like below:
+```
+../build/qemu-system-x86_64 -smp 1 -kernel <your kernel image> -accel kvm -cpu host -no-hpet -m 2G -append  "root=/dev/sda rw init=/lib/systemd/systemd tsc=reliable console=ttyS0" -hda <your root disk image> -object memory-backend-file,size=4096M,share,mem-path=/dev/shm/ivshmem,id=hostmem -device ivshmem-plain,memdev=hostmem -D rec.log -nographic
+```
+
+Then the corresponding replay argument:
+```
+../build/qemu-system-x86_64 -accel tcg -smp 1 -cpu Broadwell -no-hpet -m 2G -kernel <your kernel image> -append  "root=/dev/sda rw init=/lib/systemd/systemd tsc=reliable console=ttyS0" -hda <your root disk image> -device ivshmem-plain,memdev=hostmem -object memory-backend-file,size=4096M,share,mem-path=/dev/shm/ivshmem,id=hostmem -kernel-replay test1 -singlestep -D rec.log -monitor stdio
+```
+
+After launched, it stays paused and input `cont` command to start the replay execution:
+```
+In replay mode, execute 'cont' to start the replay
+
+(qemu) cont
+(qemu) Replayed events[1000/3951]
+Replayed events[2000/3951]
+Replayed events[3000/3951]
+...
+```
 
 At the end, it displays something below as a summary of the replay:
 ```
-Replay executed in 8.308527 seconds
+Replay executed in 1.070952 seconds
 === Event Stats ===
-Interrupt: 1207
-Syscall: 2196
-Exception: 392
-CFU: 1103
-GFU: 502
-Random: 0
-IO Input: 75672
-RDTSC: 35249
-Strnlen: 0
+Interrupt: 174
+Syscall: 289
+Exception: 168
+CFU: 130
+GFU: 409
+IO Input: 675
+RDTSC: 781
 RDSEED: 0
-PTE: 4349
+PTE: 1321
 Inst Sync: 0
 DMA Buf Size: 0
-Total Replay Events: 120681
+Total Replay Events: 3951
 Time(s): 0.00
 ```
-**Remember, apart from the parameters specifically for replay, the other VM configuration should be exactly the same as record.**
 
 ### Use gdb to debug replay:
 If you wanna debug it using gdb, you should firstly have the `vmlinux` of the same kernel used by the guest.
@@ -263,6 +292,19 @@ entry_SYSCALL_64 () at arch/x86/entry/entry_64.S:120
 (gdb)
 ```
 
+## Use NVMe device
+KRR also supports recording with emulated NVMe disk, add the following arguments:
+```
+-drive file=<your disk image file>,id=nvm,if=none -device nvme,serial=deadbeef,drive=nvm
+```
+
+For NVMe, KRR also supports `rr-ignore=true` parameter, if specified, the device's inputs will be ignored during the record. This could be used if the device is used for kernel bypass applications, and please make sure the device is already unbinded when start recording.
+
+Full command:
+```
+-drive file=<your disk image file>,id=nvm,if=none -device nvme,serial=deadbeef,drive=nvm,rr-ignore=true
+```
+
 ## Make your own recordable kernel
 Due to its split-recorder design, KRR requires some modifications to the guest linux kernel. The full changes refers to this [repo](https://github.com/tianrenz2/linux-6.1.0/tree/smp-rr), but here is a single [patch file](kernel_rr/Support-for-KRR-guest-recorder-patch) that contains all the changes. To apply the changes, mv the file to your kernel source code directory and execute:
 ```
@@ -272,6 +314,15 @@ git apply Support-for-KRR-guest-recorder-patch
 Note that this patch file is based on Linux 6.1.0, different version of source code may encounter some conflicts to resolve.
 
 To compile, we can refer to a sample [.config](kernel_rr/rr_guest_config) file, note that this config file is also based on linux 6.1.0, so depending on your own linux kernel version, it might be somehow different.
+
+
+## KRR Development
+Debugging message:
+In `include/sysemu/kernel-rr.h`, the macro below is not defined by default:
+```
+#define RR_LOG_DEBUG 1
+```
+If define this macro, there would be more detailed record/replay log message.
 
 
 ## Removed features for kernel RR

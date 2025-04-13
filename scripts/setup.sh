@@ -32,11 +32,12 @@ cp kernel-rr.service /lib/systemd/system/
 systemctl enable kernel-rr
 cp scripts/rr_set_cpu_aff /usr/bin/
 
-echo "Downloading disk and kernel image file"
-gdown --id 1AZS0GGAnhfdZ8HSqpo0XlZBV-pI_VQkk
+echo "Downloading disk and kernel image files"
+gdown --id 17LmtsNHwXui3NrP1CWFRM4VPrcEqs7FY # rocsdb disk image
 gzip -d rootfs-bypass.qcow2.gz
 
-gdown --id 1cO0qMsqkReSKdHDZ1XC8r3-lT-ixJqfW
-gdown --id 1q5MEQ1g7dSJAQQlV7hrMFv9ff6DHVWhN
+gdown --id 1cO0qMsqkReSKdHDZ1XC8r3-lT-ixJqfW # KRR image
+gdown --id 1q5MEQ1g7dSJAQQlV7hrMFv9ff6DHVWhN # Native image
+gdown --id 1ZgOJHexDfFAvf2TX9EFhv_Fn_DBsb3oe # vmlinux RR
 
 echo "Setup finished, please reboot your machine to launch KRR kernel"
