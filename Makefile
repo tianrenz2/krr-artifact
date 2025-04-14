@@ -12,11 +12,27 @@ all: build
 build:
 	bash scripts/setup.sh
 
-test_rocksdb:
+build/client:
+	bash scripts/setup_client.sh
+
+run/rocksdb:
 	bash scripts/rocksdb_benchmark.sh $(CURRENT_DIR) rocksdb $(schemes)
 
-test_rocksdb_spdk:
+run/rocksdb_spdk:
 	bash scripts/rocksdb_benchmark.sh $(CURRENT_DIR)  rocksdb-spdk $(schemes)
+
+run/redis_server:
+	bash scripts/redis_benchmark.sh $(CURRENT_DIR) redis
+
+run/redis_client:
+	bash scripts/redis_benchmark_client.sh $(CURRENT_DIR) $(host_ip) $(vm_ip)
+
+run/nginx_server:
+	bash scripts/redis_benchmark.sh $(CURRENT_DIR) nginx
+
+run/nginx_client:
+	bash scripts/nginx_benchmark_client.sh $(CURRENT_DIR) $(host_ip) $(vm_ip)
+
 
 # Clean target (optional)
 .PHONY: clean

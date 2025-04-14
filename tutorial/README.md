@@ -5,21 +5,6 @@ KRR is record-replay tool targeting Linux kernel and it's implemented based on Q
 ## Hardware Requirement
 KRR only supports Intel processor now.
 
-Supported Disk Emulation:
-| Disk Type | Description |
-| ------------- | ------------- |
-| IDE | Supported  |
-| NVMe(not including multi namespace) | Supported  |
-| Virtio  | TODO  |
-
-Supported Networ Emulation:
-| Network Type | Description |
-| ------------- | ------------- |
-| E1000 | Supported  |
-| virtio-net | TODO  |
-| vhost-net  | TODO  |
-
-
 ## Record
 
 ### Install KRR KVM
@@ -44,7 +29,7 @@ make install
 
 
 ### Compile KRR QEMU
-1. First, go to kernel RR QEMU code:
+1. First, go to kernel RR QEMU code, the latest release could be obtained [here](https://drive.google.com/file/d/19dFibkU_ltCtldfFtIwOiVcGVylptlPf/view?usp=drive_link):
 ```
 cd qemu-tcg-kvm
 ```
@@ -54,10 +39,10 @@ cd qemu-tcg-kvm
 mkdir build
 cd build
 ../configure --target-list=x86_64-softmmu
-make -j
+make -j$(nproc)
 ```
 
-3. Get the kernel you want to test, here is a prepared [Linux kernel image](https://drive.google.com/file/d/1cO0qMsqkReSKdHDZ1XC8r3-lT-ixJqfW/view?usp=drive_link) & [vmlinux](https://drive.google.com/file/d/1ZgOJHexDfFAvf2TX9EFhv_Fn_DBsb3oe/view?usp=drive_link) based on 6.1.0, if you want to build on your own, here is a [guide](#make-your-own-recordable-kernel) to help compile your recordable guest kernel image.
+3. Get the kernel you want to test, here is a prepared [Linux kernel image](https://drive.google.com/file/d/1cO0qMsqkReSKdHDZ1XC8r3-lT-ixJqfW/view?usp=drive_link) & [vmlinux](https://drive.google.com/file/d/1ZgOJHexDfFAvf2TX9EFhv_Fn_DBsb3oe/view?usp=drive_link) based on 6.1.0([source code](https://github.com/tianrenz2/linux-6.1.0/tree/smp-rr)), if you want to build on your own, here is a [guide](#make-your-own-recordable-kernel) to help compile your recordable guest kernel image.
 
 4. Get the root disk image you want to boot, [here](https://github.com/google/syzkaller/blob/master/tools/create-image.sh) is a script from syzkaller that helps you create a simple rootfs image.
 
@@ -316,19 +301,10 @@ Note that this patch file is based on Linux 6.1.0, different version of source c
 To compile, we can refer to a sample [.config](kernel_rr/rr_guest_config) file, note that this config file is also based on linux 6.1.0, so depending on your own linux kernel version, it might be somehow different.
 
 
-## KRR Development
+## KRR Development Guide
 Debugging message:
 In `include/sysemu/kernel-rr.h`, the macro below is not defined by default:
 ```
 #define RR_LOG_DEBUG 1
 ```
 If define this macro, there would be more detailed record/replay log message.
-
-
-## Removed features for kernel RR
-
-1. Since we replay in TCG now, temporarily disabled xsaves and xsavec (which are not supported in TCG) features in KVM for compatibility of TCG, so the guest would use xsaveopt;
-
-2. Disabled kvmclock device in QEMU;
-
-3. Disabled KVM pvclock, by removing KVM_FEATURE_CLOCKSOURCE and KVM_FEATURE_CLOCKSOURCE2 features exposed to guest in KVM, so that the KVM won't update the guest memory, this is for us to do memory verification;
