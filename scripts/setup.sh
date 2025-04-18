@@ -12,6 +12,7 @@ echo "Step1: compile KRR QEMU"
 gdown --id 19dFibkU_ltCtldfFtIwOiVcGVylptlPf
 tar -xf qemu-tcg-kvm.tar.gz
 cd qemu-tcg-kvm;mkdir -p build;cd build;../configure --target-list=x86_64-softmmu; make -j$(nproc);./qemu-img create nkbypass.img 5G;mkfs.ext4 nkbypass.img;./qemu-img create nvm.img 5G;cd ../..
+mkdir -p qemu-tcg-kvm/kernel_rr/test_data
 
 echo "Step2: compile KRR Kernel"
 git clone -b rr-para https://github.com/tianrenz2/kernel-rr-linux.git

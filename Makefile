@@ -1,8 +1,12 @@
 
 CURRENT_DIR := $(shell pwd)
 schemes := baseline,kernel_rr,whole_system_rr
+TEST_DATA = qemu-tcg-kvm/kernel_rr/test_data
 
 $(info CURRENT_DIR = $(CURRENT_DIR))
+
+test_data:
+	mkdir -p $(TEST_DATA)
 
 .PHONY: all
 all: build
@@ -15,10 +19,13 @@ build:
 build/client:
 	bash scripts/setup_client.sh
 
-run/rocksdb:
+run/kernel_build: test_data
+	bash scripts/kernel_benchmark.sh $(CURRENT_DIR) kbuild
+
+run/rocksdb: test_data
 	bash scripts/rocksdb_benchmark.sh $(CURRENT_DIR) rocksdb $(schemes)
 
-run/rocksdb_spdk:
+run/rocksdb_spdk: test_data
 	bash scripts/rocksdb_benchmark.sh $(CURRENT_DIR)  rocksdb-spdk $(schemes)
 
 run/redis_server:
