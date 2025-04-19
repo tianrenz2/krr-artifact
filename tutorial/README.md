@@ -291,14 +291,13 @@ Full command:
 ```
 
 ## Make your own recordable kernel
-Due to its split-recorder design, KRR requires some modifications to the guest linux kernel. The full changes refers to this [repo](https://github.com/tianrenz2/linux-6.1.0/tree/smp-rr), but here is a single [patch file](kernel_rr/Support-for-KRR-guest-recorder-patch) that contains all the changes. To apply the changes, mv the file to your kernel source code directory and execute:
+Due to its split-recorder design, KRR requires some modifications to the guest linux kernel. The full changes refers to this [repo](https://github.com/tianrenz2/linux-6.1.0/tree/smp-rr), but here is a single [patch file](0001-Support-KRR-guest-agent.patch) that contains all the changes. To apply the changes, mv the file to your kernel source code directory and execute:
 ```
-mv Support-for-KRR-guest-recorder-patch Support-for-KRR-guest-recorder.patch
-git apply Support-for-KRR-guest-recorder-patch
+git apply 0001-Support-KRR-guest-agent.patch
 ```
 Note that this patch file is based on Linux 6.1.0, different version of source code may encounter some conflicts to resolve.
 
-To compile, we can refer to a sample [.config](kernel_rr/rr_guest_config) file, note that this config file is also based on linux 6.1.0, so depending on your own linux kernel version, it might be somehow different.
+To compile, we can refer to a sample [.config](rr_guest_config) file, note that this config file is also based on linux 6.1.0, so depending on your own linux kernel version, it might be somehow different.
 
 
 ## KRR Development Guide
