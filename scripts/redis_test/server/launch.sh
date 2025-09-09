@@ -31,7 +31,7 @@ exec_qemu() {
   if [ $mode == "krr" ];then
     param="${param} krr"
     image="$basedir/bzImageRR"
-    branch="rr-para"
+    branch="master"
     ignore_record=""
     if [ "$cpu_num" -eq 1 ];then
         image="$basedir/bzImageUni"

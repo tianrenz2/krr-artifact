@@ -4,7 +4,7 @@
 1. First, go to `kernel-rr-linux/`, make sure you are on the KRR's branch, if not, checkout to it and recompile:
 ```
 cd kernel-rr-linux/
-git checkout rr-para
+git checkout master
 
 # re-compile script
 sh replace.sh

@@ -31,7 +31,7 @@ exec_qemu() {
   if [ $mode == "krr" ];then
     param="${param} krr"
     image="$basedir/bzImageRR"
-    branch="rr-para"
+    branch="master"
     ignore_record=""
     ivshmem="-object memory-backend-file,size=32768M,share,mem-path=/dev/shm/ivshmem,id=hostmem -device ivshmem-plain,memdev=hostmem"
   fi

@@ -9,15 +9,15 @@ apt-get install -y make gcc libncurses5-dev dpkg-dev build-essential bison flex 
 python3 -m pip install pandas psutil qemu.qmp matplotlib seaborn gdown
 
 echo "Step1: compile KRR QEMU"
-gdown --id 19dFibkU_ltCtldfFtIwOiVcGVylptlPf
+wget https://github.com/krr-io/krr-qemu/releases/download/v1.0.1-beta/qemu-tcg-kvm.tar.gz
 tar -xf qemu-tcg-kvm.tar.gz
 cd qemu-tcg-kvm;mkdir -p build;cd build;../configure --target-list=x86_64-softmmu; make -j$(nproc);cd ../..
 mkdir -p qemu-tcg-kvm/kernel_rr/test_data
 
 echo "Step2: compile KRR Kernel"
-git clone -b rr-para https://github.com/tianrenz2/kernel-rr-linux.git
+git clone -b master https://github.com/krr-io/kernel-rr-linux.git
 cp scripts/kernel_rr_config kernel-rr-linux/.config
-cd kernel-rr-linux/;git checkout rr-para;make -j$(nproc);make modules_install;make install;cd ..
+cd kernel-rr-linux/;git checkout master;make -j$(nproc);make modules_install;make install;cd ..
 
 echo "Step3: configure environment"
 sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& intel_idle.max_cstate=0 intel_pstate=no_turbo=1 intel_iommu=on/' /etc/default/grub && sudo update-grub

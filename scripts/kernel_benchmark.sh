@@ -30,7 +30,7 @@ do
             branch="native"
             ;;
         "kernel_rr")
-            branch="rr-para"
+            branch="master"
             ;;
         "whole_system_rr")
             branch="all-rr"

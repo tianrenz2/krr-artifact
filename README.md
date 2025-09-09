@@ -40,10 +40,10 @@ Any machines with support for Intel Performance Monitoring Unit and VT-d, 64GB m
 
 ## Software Requirements
 ### Host OS
-KRR requires a Linux kernel with a modified KVM module. We provide a modified Linux kernel 5.17.5 ([here](https://github.com/tianrenz2/kernel-rr-linux/tree/rr-para)) in this repo. This setup also assumes you are running Ubuntu 22.04 on the host.
+KRR requires a Linux kernel with a modified KVM module. We provide a modified Linux kernel 5.17.5 ([here](https://github.com/krr-io/kernel-rr-linux/tree/master)) in this repo. This setup also assumes you are running Ubuntu 22.04 on the host.
 
 ### Guest OS
-The guest kernel must also include modifications to support efficient recording. This repo includes our modified guest kernel ([here](https://github.com/tianrenz2/linux-6.1.0/tree/smp-rr)), which is based on Linux kernel 6.1.0. For performance comparison, we also provide the unmodified kernel source as a baseline source code version.
+The guest kernel must also include modifications to support efficient recording. This repo includes our modified guest kernel ([here](https://github.com/krr-io/linux-6.1.0)), which is based on Linux kernel 6.1.0. For performance comparison, we also provide the unmodified kernel source as a baseline source code version.
 
 
 ## General Usage
